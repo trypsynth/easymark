@@ -1,16 +1,25 @@
 #![windows_subsystem = "windows"]
 use native_dialog::FileDialog;
+use pulldown_cmark::{Parser, html};
 use std::{
     env,
     error::Error,
     fs::File,
     io::{self, Read, Write},
+    process,
     thread,
     time::Duration,
 };
 use tempfile::Builder;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+        process::exit(1);
+    }
+}
+
+fn run() -> Result<(), Box<dyn Error>> {
     let path = get_file_path()?;
     let md_contents = read_file_contents(&path)?;
     let html_file = create_temp_html_file(&md_contents)?;
@@ -46,7 +55,10 @@ fn read_file_contents(path: &str) -> Result<String, io::Error> {
 
 fn create_temp_html_file(md_contents: &str) -> Result<tempfile::NamedTempFile, io::Error> {
     let mut html_file = Builder::new().suffix(".html").tempfile()?;
-    writeln!(html_file, "{}", markdown::to_html(md_contents))?;
+    let parser = Parser::new(md_contents);
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+    writeln!(html_file, "{}", html_output)?;
     Ok(html_file)
 }
 

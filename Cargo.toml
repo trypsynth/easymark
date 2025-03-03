@@ -4,8 +4,8 @@ version = "1.0.0"
 edition = "2021"
 
 [dependencies]
-markdown = "1.0.0-alpha.12"
 native-dialog = "0.6.4"
+pulldown-cmark = "0.13.0"
 tempfile = "3.8.0"
 webbrowser = "0.8.11"
 

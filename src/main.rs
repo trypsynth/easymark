@@ -2,8 +2,9 @@
 use native_dialog::FileDialog;
 use std::{
     env,
+    error::Error,
     fs::File,
-    io::{Read, Write},
+    io::{self, Read, Write},
     process,
     thread,
     time::Duration,
@@ -11,33 +12,53 @@ use std::{
 use tempfile::Builder;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let path = if args.len() > 1 {
-        args[1].clone()
+    if let Err(e) = run() {
+        eprintln!("Error: {}", e);
+        process::exit(1);
+    }
+}
+
+fn run() -> Result<(), Box<dyn Error>> {
+    let path = get_file_path()?;
+    let md_contents = read_file_contents(&path)?;
+    let html_file = create_temp_html_file(&md_contents)?;
+    if let Some(html_path) = html_file.path().to_str() {
+        open_in_browser(html_path)?;
+        thread::sleep(Duration::from_secs(10)); // Give the browser time to render the page
     } else {
-        FileDialog::new()
+        return Err("Failed to convert temp file path to string.".into());
+    }
+    Ok(())
+}
+
+fn get_file_path() -> Result<String, Box<dyn Error>> {
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 {
+        Ok(args[1].clone())
+    } else {
+        let file = FileDialog::new()
             .add_filter("Markdown Files", &["md", "markdown"])
             .add_filter("All Files", &["*"])
-            .show_open_single_file()
-            .unwrap()
-            .ok_or_else(|| {
-                eprintln!("No file selected.");
-                process::exit(1);
-            })
-            .unwrap()
-            .to_str()
-            .unwrap()
-            .to_string()
-    };
-    let mut md_contents = String::new();
-    File::open(&path).unwrap().read_to_string(&mut md_contents).unwrap();
-    let mut html_file = Builder::new().suffix(".html").tempfile().unwrap();
-    writeln!(html_file, "{}", markdown::to_html(&md_contents)).unwrap();
-    if let Some(html_path) = html_file.path().to_str() {
-        if webbrowser::open(html_path).is_ok() {
-            thread::sleep(Duration::from_secs(10)); // Should be enough time for the browser to render the page without the temperary file getting claened up.
-        }
-    } else {
-        eprintln!("Error opening HTML file.");
+            .show_open_single_file()?
+            .ok_or("No file selected.")?;
+        Ok(file.to_str().ok_or("Invalid file path")?.to_string())
     }
+}
+
+fn read_file_contents(path: &str) -> Result<String, io::Error> {
+    let mut file = File::open(path)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
+fn create_temp_html_file(md_contents: &str) -> Result<tempfile::NamedTempFile, io::Error> {
+    let mut html_file = Builder::new().suffix(".html").tempfile()?;
+    writeln!(html_file, "{}", markdown::to_html(md_contents))?;
+    Ok(html_file)
+}
+
+fn open_in_browser(html_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    webbrowser::open(html_path)?;
+    Ok(())
 }

@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 use native_dialog::FileDialog;
-use pulldown_cmark::{Parser, html};
+use pulldown_cmark::{html, Options, Parser};
 use std::{
     env,
     error::Error,
@@ -47,7 +47,8 @@ fn read_file_contents(path: &str) -> Result<String, io::Error> {
 
 fn create_temp_html_file(md_contents: &str) -> Result<tempfile::NamedTempFile, io::Error> {
     let mut html_file = Builder::new().suffix(".html").tempfile()?;
-    let parser = Parser::new(md_contents);
+    let options = Options::ENABLE_TABLES | Options::ENABLE_FOOTNOTES | Options::ENABLE_STRIKETHROUGH | Options::ENABLE_TASKLISTS | Options::ENABLE_SMART_PUNCTUATION | Options::ENABLE_HEADING_ATTRIBUTES | Options::ENABLE_YAML_STYLE_METADATA_BLOCKS | Options::ENABLE_PLUSES_DELIMITED_METADATA_BLOCKS | Options::ENABLE_OLD_FOOTNOTES | Options::ENABLE_MATH | Options::ENABLE_GFM | Options::ENABLE_DEFINITION_LIST | Options::ENABLE_SUPERSCRIPT | Options::ENABLE_SUBSCRIPT | Options::ENABLE_WIKILINKS;
+    let parser = Parser::new_ext(md_contents, options);
     let mut html_output = String::new();
     html::push_html(&mut html_output, parser);
     writeln!(html_file, "{}", html_output)?;

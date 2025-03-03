@@ -12,14 +12,7 @@ use std::{
 };
 use tempfile::Builder;
 
-fn main() {
-    if let Err(e) = run() {
-        eprintln!("Error: {}", e);
-        process::exit(1);
-    }
-}
-
-fn run() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let path = get_file_path()?;
     let md_contents = read_file_contents(&path)?;
     let html_file = create_temp_html_file(&md_contents)?;

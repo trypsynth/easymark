@@ -6,7 +6,6 @@ use std::{
     error::Error,
     fs::File,
     io::{self, Read, Write},
-    process,
     thread,
     time::Duration,
 };

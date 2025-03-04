@@ -9,7 +9,7 @@ use std::{
     thread,
     time::Duration,
 };
-use tempfile::Builder;
+use tempfile::{Builder, NamedTempFile};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let path = get_file_path()?;
@@ -45,7 +45,7 @@ fn read_file_contents(path: &str) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn create_temp_html_file(md_contents: &str) -> Result<tempfile::NamedTempFile, io::Error> {
+fn create_temp_html_file(md_contents: &str) -> Result<NamedTempFile, io::Error> {
     let mut html_file = Builder::new().suffix(".html").tempfile()?;
     let options = Options::ENABLE_TABLES
         | Options::ENABLE_FOOTNOTES

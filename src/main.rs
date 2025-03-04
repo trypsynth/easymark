@@ -5,7 +5,7 @@ use std::{
     env,
     error::Error,
     fs::File,
-    io::{self, Read, Write},
+    io::{self, Read},
     thread,
     time::Duration,
 };
@@ -63,9 +63,7 @@ fn create_temp_html_file(md_contents: &str) -> Result<NamedTempFile, io::Error> 
         | Options::ENABLE_SUBSCRIPT
         | Options::ENABLE_WIKILINKS;
     let parser = Parser::new_ext(md_contents, options);
-    let mut html_output = String::new();
-    html::push_html(&mut html_output, parser);
-    writeln!(html_file, "{}", html_output)?;
+    html::write_html_io(&mut html_file, parser)?;
     Ok(html_file)
 }
 

@@ -67,7 +67,7 @@ fn create_temp_html_file(md_contents: &str) -> Result<NamedTempFile, io::Error> 
     Ok(html_file)
 }
 
-fn open_in_browser(html_path: &str) -> Result<(), Box<dyn std::error::Error>> {
+fn open_in_browser(html_path: &str) -> Result<(), Box<dyn Error>> {
     webbrowser::open(html_path)?;
     Ok(())
 }

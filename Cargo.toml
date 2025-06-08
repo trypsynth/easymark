@@ -8,8 +8,8 @@ edition = "2021"
 anyhow = "1.0.98"
 native-dialog = "0.6.4"
 pulldown-cmark = "0.13.0"
-tempfile = "3.8.0"
-webbrowser = "0.8.11"
+tempfile = "3.20.0"
+webbrowser = "0.8.15"
 
 [profile.release]
 strip = true

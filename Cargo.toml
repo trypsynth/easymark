@@ -5,6 +5,7 @@ repository = "https://github.com/trypsynth/easymark"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.98"
 native-dialog = "0.6.4"
 pulldown-cmark = "0.13.0"
 tempfile = "3.8.0"

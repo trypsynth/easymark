@@ -2,7 +2,7 @@
 #![windows_subsystem = "windows"]
 
 use anyhow::{Result, anyhow};
-use native_dialog::FileDialog;
+use native_dialog::DialogBuilder;
 use pulldown_cmark::{Options, Parser, html};
 use std::{env, fs, thread, time::Duration};
 use tempfile::{Builder, NamedTempFile};
@@ -21,10 +21,11 @@ fn get_file_path() -> Result<String> {
 	if let Some(path) = env::args().nth(1) {
 		Ok(path)
 	} else {
-		let file = FileDialog::new()
+		let file = DialogBuilder::file()
 			.add_filter("Markdown Files", &["md", "markdown"])
 			.add_filter("All Files", &["*"])
-			.show_open_single_file()?
+			.open_single_file()
+			.show()?
 			.ok_or_else(|| anyhow!("No file selected"))?;
 		file.to_str().map(str::to_owned).ok_or_else(|| anyhow!("Invalid file path"))
 	}

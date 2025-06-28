@@ -22,7 +22,7 @@ fn get_file_path() -> Result<String> {
 		Ok(path)
 	} else {
 		let file = DialogBuilder::file()
-			.add_filter("Markdown Files", &["md", "markdown"])
+			.add_filter("Markdown Files", &["md", "markdown", "mdx", "mdown", "mdwn", "mkd", "mkdn", "mkdown", "ronn"])
 			.add_filter("All Files", &["*"])
 			.open_single_file()
 			.show()?

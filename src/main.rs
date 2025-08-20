@@ -1,10 +1,11 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 #![windows_subsystem = "windows"]
 
+use std::{env, fs, thread, time::Duration};
+
 use anyhow::{Result, anyhow};
 use native_dialog::DialogBuilder;
 use pulldown_cmark::{Options, Parser, html};
-use std::{env, fs, thread, time::Duration};
 use tempfile::{Builder, NamedTempFile};
 
 fn main() -> Result<()> {

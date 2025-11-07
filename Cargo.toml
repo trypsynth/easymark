@@ -8,11 +8,11 @@ rust-version = "1.85.1"
 license = "MIT"
 
 [dependencies]
-anyhow = "1.0.98"
-native-dialog = "0.9.0"
+anyhow = "1.0.100"
+native-dialog = "0.9.3"
 pulldown-cmark = "0.13.0"
-tempfile = "3.20.0"
-webbrowser = "1.0.5"
+tempfile = "3.23.0"
+webbrowser = "1.0.6"
 
 [profile.release]
 strip = true

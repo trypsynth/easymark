@@ -98,7 +98,14 @@ fn parse_request_line(line: &str) -> Result<(String, String)> {
 }
 
 fn render_markdown_page(md_path: &PathBuf) -> Result<String> {
-	let md = fs::read_to_string(md_path)?;
+	let md = match fs::read_to_string(md_path) {
+		Ok(content) => content,
+		Err(_) => {
+			// File has encoding issues, read as bytes and decode lossily.
+			let bytes = fs::read(md_path)?;
+			String::from_utf8_lossy(&bytes).into_owned()
+		}
+	};
 	let parser = Parser::new_ext(&md, Options::all());
 	let mut body_html = String::new();
 	html::push_html(&mut body_html, parser);

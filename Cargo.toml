@@ -10,7 +10,6 @@ rust-version = "1.85.1"
 [dependencies]
 native-dialog = "0.9.3"
 pulldown-cmark = { version = "0.13.0", default-features = false, features = ["html"] }
-webbrowser = "1.0.6"
 
 [profile.release]
 strip = true

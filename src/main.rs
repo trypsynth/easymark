@@ -7,6 +7,7 @@ use std::{
 	io::{BufRead, BufReader, Write},
 	net::{TcpListener, TcpStream},
 	path::PathBuf,
+	process::Command,
 	result, thread,
 };
 
@@ -20,7 +21,7 @@ fn main() -> Result<()> {
 	let addr = serve_markdown(PathBuf::from(path))?;
 	let url = format!("http://{addr}/");
 	println!("Running on {url}");
-	webbrowser::open(&url)?;
+	open_browser(&url);
 	loop {
 		thread::park();
 	}
@@ -38,6 +39,15 @@ fn get_file_path() -> Result<String> {
 			.ok_or("No file selected")?;
 		file.to_str().map(str::to_owned).ok_or_else(|| "Invalid file path".into())
 	}
+}
+
+fn open_browser(url: &str) {
+	#[cfg(target_os = "windows")]
+	Command::new("cmd").args(["/c", "start", url]).spawn().ok();
+	#[cfg(target_os = "macos")]
+	Command::new("open").arg(url).spawn().ok();
+	#[cfg(target_os = "linux")]
+	Command::new("xdg-open").arg(url).spawn().ok();
 }
 
 fn serve_markdown(path: PathBuf) -> Result<String> {

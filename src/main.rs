@@ -1,16 +1,19 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
 use std::{
-	env, fs,
+	env,
+	error::Error,
+	fs,
 	io::{BufRead, BufReader, Write},
 	net::{TcpListener, TcpStream},
 	path::PathBuf,
-	thread,
+	result, thread,
 };
 
-use anyhow::{Result, anyhow};
 use native_dialog::DialogBuilder;
 use pulldown_cmark::{Options, Parser, html};
+
+type Result<T> = result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
 	let path = get_file_path()?;
@@ -32,8 +35,8 @@ fn get_file_path() -> Result<String> {
 			.add_filter("All Files", ["*"])
 			.open_single_file()
 			.show()?
-			.ok_or_else(|| anyhow!("No file selected"))?;
-		file.to_str().map(str::to_owned).ok_or_else(|| anyhow!("Invalid file path"))
+			.ok_or("No file selected")?;
+		file.to_str().map(str::to_owned).ok_or_else(|| "Invalid file path".into())
 	}
 }
 
@@ -79,8 +82,8 @@ fn handle_connection(stream: &TcpStream, md_path: &PathBuf) -> Result<()> {
 
 fn parse_request_line(line: &str) -> Result<(String, String)> {
 	let mut parts = line.split_whitespace();
-	let method = parts.next().ok_or_else(|| anyhow!("Malformed request"))?.to_string();
-	let path = parts.next().ok_or_else(|| anyhow!("Malformed request"))?.to_string();
+	let method = parts.next().ok_or("Malformed request")?.to_string();
+	let path = parts.next().ok_or("Malformed request")?.to_string();
 	Ok((method, path))
 }
 

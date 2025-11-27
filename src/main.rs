@@ -28,8 +28,8 @@ fn get_file_path() -> Result<String> {
 		Ok(path)
 	} else {
 		let file = DialogBuilder::file()
-			.add_filter("Markdown Files", &["md", "markdown", "mdx", "mdown", "mdwn", "mkd", "mkdn", "mkdown", "ronn"])
-			.add_filter("All Files", &["*"])
+			.add_filter("Markdown Files", ["md", "markdown", "mdx", "mdown", "mdwn", "mkd", "mkdn", "mkdown", "ronn"])
+			.add_filter("All Files", ["*"])
 			.open_single_file()
 			.show()?
 			.ok_or_else(|| anyhow!("No file selected"))?;
@@ -44,8 +44,8 @@ fn serve_markdown(path: PathBuf) -> Result<String> {
 	thread::spawn(move || {
 		for stream in listener.incoming() {
 			match stream {
-				Ok(mut s) => {
-					if let Err(e) = handle_connection(&mut s, &path) {
+				Ok(s) => {
+					if let Err(e) = handle_connection(&s, &path) {
 						eprintln!("Connection error: {e}");
 					}
 				}
@@ -56,7 +56,7 @@ fn serve_markdown(path: PathBuf) -> Result<String> {
 	Ok(addr_string)
 }
 
-fn handle_connection(stream: &mut TcpStream, md_path: &PathBuf) -> Result<()> {
+fn handle_connection(stream: &TcpStream, md_path: &PathBuf) -> Result<()> {
 	stream.set_nodelay(true).ok();
 	let mut reader = BufReader::new(stream.try_clone()?);
 	let mut request_line = String::new();
@@ -72,7 +72,6 @@ fn handle_connection(stream: &mut TcpStream, md_path: &PathBuf) -> Result<()> {
 	let (method, path) = parse_request_line(&request_line)?;
 	match (method.as_str(), path.as_str()) {
 		("GET", "/") => respond_ok_html(stream, &render_markdown_page(md_path)?)?,
-		("GET", "/favicon.ico") => respond_not_found(stream)?,
 		_ => respond_not_found(stream)?,
 	}
 	Ok(())
@@ -99,7 +98,7 @@ fn render_markdown_page(md_path: &PathBuf) -> Result<String> {
 fn respond_ok_html(mut stream: &TcpStream, body: &str) -> Result<()> {
 	let headers = format!(
 		"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-		body.as_bytes().len()
+		body.len()
 	);
 	stream.write_all(headers.as_bytes())?;
 	stream.write_all(body.as_bytes())?;
@@ -111,7 +110,7 @@ fn respond_not_found(mut stream: &TcpStream) -> Result<()> {
 	let body = "<h1>404 Not Found</h1>";
 	let headers = format!(
 		"HTTP/1.1 404 Not Found\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-		body.as_bytes().len()
+		body.len()
 	);
 	stream.write_all(headers.as_bytes())?;
 	stream.write_all(body.as_bytes())?;
